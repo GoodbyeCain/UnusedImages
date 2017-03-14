@@ -29,14 +29,13 @@ extension Process {
     
     class func processShell(args:[String]) -> String? {        
         let process = Process()
-        process.launchPath = "/bin/zsh";
+        process.launchPath = "/bin/sh";
         process.arguments = args
         
         let pipe = Pipe()
         process.standardOutput = pipe
         
         process.launch()
-        process.waitUntilExit()
         
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         return String.init(data: data, encoding: String.Encoding.utf8)

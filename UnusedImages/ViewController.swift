@@ -24,6 +24,7 @@ class ViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        steupDefalutFolderPath()
         self.scanner = Scanner()
         tableView.doubleAction = #selector(ViewController.tableViewDoubleClick)
     }
@@ -39,6 +40,7 @@ extension ViewController {
         openPanel.canChooseDirectories = true
         if openPanel.runModal() == NSModalResponseOK {
             pathTextField.stringValue = (openPanel.directoryURL?.path)!
+            saveToDefalutFolderPath(path: pathTextField.stringValue)
         }
     }
     
@@ -120,7 +122,19 @@ extension ViewController {
     
     func tableViewDoubleClick() {
         let clickRow = tableView.clickedRow;
-        if tableView.clickedColumn > 1 {
+        if (tableView.clickedColumn == 3 || tableView.clickedRow == -1) {
+            let numberRegEx  = ".*[0-9]+.*"
+            let testCase = NSPredicate(format:"SELF MATCHES %@", numberRegEx)
+            if let names = unusedDataName {
+                for i in 0 ..< names.count {
+                    let name = names[i]
+                    let containsNumber = testCase.evaluate(with: name)
+                    selectStatus?[i] = !containsNumber
+                }
+                tableView.reloadData()
+            }
+            return
+        } else if tableView.clickedColumn > 1 || tableView.clickedRow < 0 {
             return
         }
         if let data = self.unusedData {
@@ -162,13 +176,13 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
     }
     
     func tableView(_ tableView: NSTableView, didClick tableColumn: NSTableColumn) {
-        let identifier = tableColumn.identifier
-        if identifier == selectIdentifier {
-            selectStatus = selectStatus?.map({ (value) -> Bool in
-                return !value
-            })
-            tableView.reloadData()
-        }
+//        let identifier = tableColumn.identifier
+//        if identifier == selectIdentifier {
+//            selectStatus = selectStatus?.map({ (value) -> Bool in
+//                return !value
+//            })
+//            tableView.reloadData()
+//        }
         
         let index = tableView.tableColumns.index(of: tableColumn)
         tableView.deselectColumn(index!)
@@ -186,6 +200,7 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
 }
 
 // MARK: -Setting
+let lastFolderPath = "LastFolderPath"
 extension ViewController {
     
     func showAlert(title: String , subtitle:String) {
@@ -207,4 +222,14 @@ extension ViewController {
         }
     }
     
+    func steupDefalutFolderPath() {
+        if let path = UserDefaults.standard.object(forKey: lastFolderPath) {
+            pathTextField.stringValue = path as! String
+        }
+    }
+    
+    func saveToDefalutFolderPath(path: String) {
+        UserDefaults.standard.setValue(path, forKey: lastFolderPath)
+        UserDefaults.standard.synchronize()
+    }
 }

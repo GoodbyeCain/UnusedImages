@@ -59,7 +59,7 @@ class Scanner {
         
         let shellPath = Bundle.main.path(forResource: "search", ofType: "sh");
         if let resultString = Process.processShell(args: [shellPath!, path]) {
-            let constStringArray = resultString.components(separatedBy: "\n")
+            let constStringArray = resultString.components(separatedBy: " ")
             constStringSet = Set(constStringArray)
             return constStringSet
         }
